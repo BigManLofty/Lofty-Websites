@@ -1488,19 +1488,29 @@
     const activePanel = form.querySelector('.form-panel.active');
     const type = activePanel.id === 'panel-preview' ? 'Website Preview' : 'Free Consultation';
 
-    // Validate required fields in active panel only
-    const nameVal = activePanel.querySelector('[name="name"]').value.trim();
-    const emailVal = activePanel.querySelector('[name="email"]').value.trim();
+    // Clear any previous error
+    const prevErr = activePanel.querySelector('.form-error');
+    if (prevErr) prevErr.remove();
+
+    // Validate name and email in active panel only
+    const nameInput = activePanel.querySelector('[name="name"]');
+    const emailInput = activePanel.querySelector('[name="email"]');
+    const nameVal = nameInput ? nameInput.value.trim() : '';
+    const emailVal = emailInput ? emailInput.value.trim() : '';
     if (!nameVal || !emailVal) {
-      activePanel.querySelector('[name="name"]').reportValidity && activePanel.querySelector('[name="name"]').reportValidity();
-      activePanel.querySelector('[name="email"]').reportValidity && activePanel.querySelector('[name="email"]').reportValidity();
+      const err = document.createElement('p');
+      err.className = 'form-error';
+      err.style.cssText = 'color:#ff453a;font-size:14px;margin-bottom:14px;padding:12px 16px;background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);border-radius:10px;';
+      err.textContent = 'Please fill in your name and email address.';
+      activePanel.querySelector('.form-submit').before(err);
       return;
     }
 
-    // Collect all named fields
-    const fd = new FormData(activePanel);
+    // Collect all named fields from the active panel
     const data = { type, date: new Date().toLocaleString() };
-    fd.forEach((val, key) => { data[key] = val; });
+    activePanel.querySelectorAll('[name]').forEach(el => {
+      data[el.name] = el.value;
+    });
 
     // 1) Send to Google Sheets (silent background POST)
     if (SHEETS_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
