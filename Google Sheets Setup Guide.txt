@@ -1,0 +1,108 @@
+LOFTY WEBSITES — GOOGLE SHEETS SETUP GUIDE
+==========================================
+Takes about 3 minutes. Do this once and it works forever.
+
+
+STEP 1 — CREATE YOUR GOOGLE SHEET
+-----------------------------------
+1. Go to: https://sheets.google.com
+2. Click the big "+" to create a new blank spreadsheet
+3. Click "Untitled spreadsheet" at the top and rename it: Lofty Websites Leads
+4. In Row 1, type these headers exactly, one per column:
+
+   A1: Date
+   B1: Type
+   C1: name
+   D1: email
+   E1: company
+   F1: phone
+   G1: industry
+   H1: message
+
+   (Leave row 1 as headers — submissions will fill in from row 2 onward)
+
+
+STEP 2 — OPEN APPS SCRIPT
+---------------------------
+1. In your sheet, click the menu: Extensions → Apps Script
+2. A new tab opens (script.google.com)
+3. Delete everything already in the editor (Ctrl+A then Delete)
+4. Copy and paste ALL of the code below:
+
+-------- COPY FROM HERE --------
+
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    sheet.appendRow([
+      data.date       || new Date().toLocaleString(),
+      data.type       || '',
+      data.name       || '',
+      data.email      || '',
+      data.company    || '',
+      data.phone      || '',
+      data.industry   || '',
+      data.message    || ''
+    ]);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'Lofty Websites lead capture is live.' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+-------- COPY TO HERE --------
+
+5. Click the floppy disk icon (Save) or press Ctrl+S
+6. Name the project "Lofty Lead Capture" when prompted → click OK
+
+
+STEP 3 — DEPLOY AS A WEB APP
+------------------------------
+1. Click the blue "Deploy" button (top right)
+2. Click "New deployment"
+3. Click the gear icon next to "Select type" → choose "Web app"
+4. Set these two settings:
+      Execute as:      Me (your Google account)
+      Who has access:  Anyone
+5. Click "Deploy"
+6. Google will ask you to authorize — click "Authorize access"
+7. Choose your Google account → click "Allow"
+8. COPY the "Web app URL" that appears — it looks like:
+      https://script.google.com/macros/s/XXXXXXXXXXXXXXXXX/exec
+
+
+STEP 4 — PASTE THE URL INTO YOUR WEBSITE
+------------------------------------------
+1. Open:  index.html  (in your "Lofty Websites" folder)
+2. Press Ctrl+F and search for:  YOUR_GOOGLE_APPS_SCRIPT_URL_HERE
+3. Replace that entire text with the URL you copied in Step 3
+4. Save the file
+
+That's it. Every form submission now:
+  → Drops a new row in your Google Sheet (name, email, company, date, type)
+  → Sends you an email at Riot.lango12@gmail.com
+
+
+NOTES
+------
+- The email feature (formsubmit.co) works RIGHT NOW with no setup needed.
+  The first time someone submits the form, you'll get a confirmation email
+  from formsubmit.co asking you to verify your address. Click confirm once
+  and all future submissions will come through automatically.
+
+- If you ever re-deploy the Apps Script (after editing the code), the URL
+  changes. Make sure to update index.html with the new URL each time.
+
+- GitHub Pages compatible — this entire setup works on static hosting.
+  No server or paid plan required.
